@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube 바이브코딩·AI 에이전트 소식 모음</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --text-2: #475569;
+    --text-3: #64748b;
+    --accent: #ef4444;
+    --accent-soft: rgba(239, 68, 68, 0.10);
+    --agent: #ef4444;
+    --guide: #3b82f6;
+    --insight: #f59e0b;
+    --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-2: #1e293b;
+      --border: #273449;
+      --text: #f8fafc;
+      --text-2: #cbd5e1;
+      --text-3: #94a3b8;
+      --accent: #f87171;
+      --accent-soft: rgba(248, 113, 113, 0.16);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 20px 20px 64px;
+  }
+  .top-nav {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .nav-pill {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-2);
+    text-decoration: none;
+  }
+  .nav-pill.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+  }
+  .badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .badge {
+    font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .badge.muted { background: var(--surface-2); color: var(--text-2); }
+  h1 { margin: 0 0 8px; font-size: 27px; letter-spacing: -0.02em; line-height: 1.25; }
+  .hero-desc { margin: 0 0 14px; color: var(--text-2); font-size: 14.5px; }
+  .hero-meta { font-size: 12.5px; color: var(--text-3); display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;
+  }
+  @media (max-width: 720px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 15px 18px;
+  }
+  .kpi-label { font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
+  .kpi-value { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .kpi-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+  .toolbar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tab-btn {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .tab-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .search-input, .sort-select {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 12px; font-size: 13px; font-family: inherit;
+  }
+  .search-input { min-width: 210px; }
+
+  .cards {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px;
+  }
+  .vid-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .vid-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .thumb-wrap {
+    position: relative; aspect-ratio: 16 / 9; background: #0f172a; overflow: hidden; display: block;
+  }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .dur-badge {
+    position: absolute; right: 8px; bottom: 8px; background: rgba(0, 0, 0, 0.82);
+    color: #fff; font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", monospace;
+  }
+  .cat-overlay {
+    position: absolute; left: 8px; top: 8px; background: rgba(15, 23, 42, 0.82);
+    color: #fff; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  }
+  .vid-body { padding: 16px 18px 14px; flex: 1; display: flex; flex-direction: column; }
+  .vid-title { margin: 0 0 8px; font-size: 15.5px; font-weight: 700; line-height: 1.38; color: var(--text); }
+  .vid-summary { margin: 0 0 12px; font-size: 13.5px; color: var(--text-2); line-height: 1.55; flex: 1; }
+  .vid-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 12px 18px; border-top: 1px solid var(--border); font-size: 12.5px;
+  }
+  .channel { color: var(--text-3); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
+  .metrics { display: flex; gap: 10px; align-items: center; color: var(--text-2); white-space: nowrap; }
+  .yt-link {
+    font-weight: 700; font-size: 12.5px; padding: 4px 10px; border-radius: 8px;
+    background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+  }
+  .log-box {
+    margin-top: 32px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 24px;
+  }
+  .log-box h2 { margin: 0 0 8px; font-size: 17px; }
+  .log-box ul { margin: 8px 0 0; padding-left: 18px; color: var(--text-2); font-size: 13.5px; }
+  .empty {
+    grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: var(--text-3);
+    background: var(--surface); border: 1px dashed var(--border); border-radius: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <nav class="top-nav">
+    <a class="nav-pill" href="/">𝕏 X 바이브코딩</a>
+    <a class="nav-pill active" href="/youtube/">▶ YouTube 바이브코딩·에이전트</a>
+  </nav>
+
+  <section class="hero">
+    <div class="badge-row">
+      <span class="badge">▶ YouTube 리서치 리포트</span>
+      <span class="badge muted">매시간 자동 동기화</span>
+    </div>
+    <h1>YouTube 바이브코딩·AI 에이전트 소식 모음</h1>
+    <p class="hero-desc">
+      유튜브의 한국어·영어 최신 바이브코딩 및 AI 코딩 에이전트 영상 중 실전 워크플로, 핵심 기본기, 현장 인사이트를 썸네일과 함께 정리해 매시간 업데이트합니다.
+    </p>
+    <div class="hero-meta">
+      <span>🕒 마지막 업데이트: <strong>2026-11-25 15:36 (KST)</strong></span>
+      <span>🔍 키워드: 바이브코딩 · AI 에이전트 코딩 · vibe coding · AI coding agent</span>
+    </div>
+  </section>
+
+  <section class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-label">총 수집 영상</div>
+      <div class="kpi-value">15편</div>
+      <div class="kpi-sub">중복 제외 최신 선별</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">🤖 에이전트·워크플로</div>
+      <div class="kpi-value">6편</div>
+      <div class="kpi-sub">에이전틱 코딩·자동화</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">🎓 가이드·기본기</div>
+      <div class="kpi-value">6편</div>
+      <div class="kpi-sub">Claude Code·Git·설계</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">👀 누적 조회수 합계</div>
+      <div class="kpi-value">1,027,156</div>
+      <div class="kpi-sub">💡 사례·인사이트 3편 포함</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="toolbar">
+      <div class="tabs">
+        <button class="tab-btn active" data-cat="all">전체 (15)</button>
+        <button class="tab-btn" data-cat="agent">🤖 에이전트·워크플로 (6)</button>
+        <button class="tab-btn" data-cat="guide">🎓 가이드·기본기 (6)</button>
+        <button class="tab-btn" data-cat="insight">💡 사례·인사이트 (3)</button>
+      </div>
+      <div class="controls">
+        <input class="search-input" id="search" type="search" placeholder="제목·채널·키워드 검색...">
+        <select class="sort-select" id="sort">
+          <option value="default">기본 정렬</option>
+          <option value="views">조회수 많은 순</option>
+          <option value="date">최신 날짜 순</option>
+        </select>
+      </div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section class="log-box">
+    <h2>업데이트 로그</h2>
+    <ul>
+      <li><strong>2026-11-25 15:36 (KST)</strong>: 초기 문서 생성 — YouTube 최근 1주일 바이브코딩·AI 에이전트 핵심 영상 15건 정리.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const ITEMS = [{"id": 1, "videoId": "h4tHDFCPmQE", "thumb": "https://i.ytimg.com/vi/h4tHDFCPmQE/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "Vibe Coding vs. Agentic Coding: Which Should You Use?", "channel": "IBM Technology", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=h4tHDFCPmQE", "views": 190693, "duration": "8:37", "summary": "모든 AI 코딩 작업에 같은 방식을 쓰면 안 된다며, 바이브코딩과 에이전틱 코딩 워크플로의 차이를 나란히 비교하고 언제 무엇을 선택할지 정리.", "summaryHtml": "모든 AI 코딩 작업에 같은 방식을 쓰면 안 된다며, 바이브코딩과 에이전틱 코딩 워크플로의 차이를 나란히 비교하고 언제 무엇을 선택할지 정리.", "titleHtml": "Vibe Coding vs. Agentic Coding: Which Should You Use?"}, {"id": 2, "videoId": "BDdy1MamCfE", "thumb": "https://i.ytimg.com/vi/BDdy1MamCfE/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "The Last Coding Agent You’ll Need? How I Give Hermes Coding Powers", "channel": "Wanderloots", "date": "2026-11-21", "url": "https://www.youtube.com/watch?v=BDdy1MamCfE", "views": 68723, "duration": "30:12", "summary": "매주 최고의 코딩 에이전트가 바뀌는 상황에서 매번 처음부터 세팅하지 않고, 자신만의 최적화된 에이전트 코딩 시스템을 구축하는 방법 공유.", "summaryHtml": "매주 최고의 코딩 에이전트가 바뀌는 상황에서 매번 처음부터 세팅하지 않고, 자신만의 최적화된 에이전트 코딩 시스템을 구축하는 방법 공유.", "titleHtml": "The Last Coding Agent You’ll Need? How I Give Hermes Coding Powers"}, {"id": 3, "videoId": "GF9LLcBoyJo", "thumb": "https://i.ytimg.com/vi/GF9LLcBoyJo/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "My Complete AI Coding Workflow (From Zero to Shipped)", "channel": "Jan Marshal", "date": "2026-11-21", "url": "https://www.youtube.com/watch?v=GF9LLcBoyJo", "views": 19417, "duration": "2:39:30", "summary": "같은 모델과 같은 코딩 에이전트를 쓰는데도 누군가는 실제 제품을 출시하고 누군가는 실패하는 차이를 제로-투-배포 전체 워크플로로 시연.", "summaryHtml": "같은 모델과 같은 코딩 에이전트를 쓰는데도 누군가는 실제 제품을 출시하고 누군가는 실패하는 차이를 제로-투-배포 전체 워크플로로 시연.", "titleHtml": "My Complete AI Coding Workflow (From Zero to Shipped)"}, {"id": 4, "videoId": "etrC9bplAbA", "thumb": "https://i.ytimg.com/vi/etrC9bplAbA/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "I Built a Coding Agent That Builds Itself", "channel": "Leon van Zyl", "date": "2026-11-19", "url": "https://www.youtube.com/watch?v=etrC9bplAbA", "views": 17771, "duration": "25:02", "summary": "스스로 코드를 개선하고 확장하는 자기구축형 코딩 에이전트를 설계·구현한 실전 아키텍처 사례.", "summaryHtml": "스스로 코드를 개선하고 확장하는 자기구축형 코딩 에이전트를 설계·구현한 실전 아키텍처 사례.", "titleHtml": "I Built a Coding Agent That Builds Itself"}, {"id": 5, "videoId": "j4bGOvvVxJI", "thumb": "https://i.ytimg.com/vi/j4bGOvvVxJI/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "페이블 5.2에 힉스필드 슈퍼컴퓨터를 붙여서 바이브코딩 시키기", "channel": "코드깎는노인", "date": "2026-11-25", "url": "https://www.youtube.com/watch?v=j4bGOvvVxJI", "views": 2196, "duration": "14:14", "summary": "최신 모델 Fable 5.2에 클라우드 컴퓨팅 환경을 결합해 실제 바이브코딩 작업을 수행시켜 본 실전 테스트 리뷰.", "summaryHtml": "최신 모델 Fable 5.2에 클라우드 컴퓨팅 환경을 결합해 실제 바이브코딩 작업을 수행시켜 본 실전 테스트 리뷰.", "titleHtml": "페이블 5.2에 힉스필드 슈퍼컴퓨터를 붙여서 바이브코딩 시키기"}, {"id": 6, "videoId": "mnD1MrQQuhQ", "thumb": "https://i.ytimg.com/vi/mnD1MrQQuhQ/hqdefault.jpg", "categoryKey": "agent", "categoryLabel": "에이전트·워크플로", "categoryIcon": "🤖", "title": "Vibe coding XR: Powering on-device spatial AI with XR Blocks, LiteRT.js, and Gemini", "channel": "Chrome for Developers", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=mnD1MrQQuhQ", "views": 410, "duration": "8:58", "summary": "Google Chrome 공식 채널에서 XR Blocks·LiteRT.js·Gemini로 자연어 지시를 온디바이스 공간 컴퓨팅 웹앱으로 바꾸는 바이브코딩 사례 소개.", "summaryHtml": "Google Chrome 공식 채널에서 XR Blocks·LiteRT.js·Gemini로 자연어 지시를 온디바이스 공간 컴퓨팅 웹앱으로 바꾸는 바이브코딩 사례 소개.", "titleHtml": "Vibe coding XR: Powering on-device spatial AI with XR Blocks, LiteRT.js, and Gemini"}, {"id": 7, "videoId": "mU8WKII1gpk", "thumb": "https://i.ytimg.com/vi/mU8WKII1gpk/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "How to Actually Code with AI (ft. Matt Pocock)", "channel": "NetworkChuck & Matt Pocock", "date": "2026-11-21", "url": "https://www.youtube.com/watch?v=mU8WKII1gpk", "views": 595978, "duration": "2:02:36", "summary": "초보 바이브코더부터 10년 차 개발자까지 AI로 실제 프로덕션 수준의 코드를 짜기 위해 반드시 지켜야 할 핵심 원칙을 심층 대담으로 정리.", "summaryHtml": "초보 바이브코더부터 10년 차 개발자까지 AI로 실제 프로덕션 수준의 코드를 짜기 위해 반드시 지켜야 할 핵심 원칙을 심층 대담으로 정리.", "titleHtml": "How to Actually Code with AI (ft. Matt Pocock)"}, {"id": 8, "videoId": "nbdnpBBZJvc", "thumb": "https://i.ytimg.com/vi/nbdnpBBZJvc/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "바이브코더가 Git을 꼭 알아야 하는 이유", "channel": "코드깎는노인", "date": "2026-11-20", "url": "https://www.youtube.com/watch?v=nbdnpBBZJvc", "views": 48826, "duration": "36:30", "summary": "바이브코딩 중 코드가 망가졌을 때 안전하게 되돌리고 버전을 관리하기 위해 비개발자·바이브코더가 꼭 알아야 할 Git 핵심만 정리.", "summaryHtml": "바이브코딩 중 코드가 망가졌을 때 안전하게 되돌리고 버전을 관리하기 위해 비개발자·바이브코더가 꼭 알아야 할 Git 핵심만 정리.", "titleHtml": "바이브코더가 Git을 꼭 알아야 하는 이유"}, {"id": 9, "videoId": "fwHWGV5EKGg", "thumb": "https://i.ytimg.com/vi/fwHWGV5EKGg/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "How to Start Vibe Coding as a Complete Beginner in 2026", "channel": "Mikey No Code", "date": "2026-11-21", "url": "https://www.youtube.com/watch?v=fwHWGV5EKGg", "views": 34764, "duration": "23:23", "summary": "완전 초보자가 2026년 기준으로 바이브코딩을 시작해 첫 앱·웹사이트와 AI 에이전트를 만들어 보는 입문 로드맵.", "summaryHtml": "완전 초보자가 2026년 기준으로 바이브코딩을 시작해 첫 앱·웹사이트와 AI 에이전트를 만들어 보는 입문 로드맵.", "titleHtml": "How to Start Vibe Coding as a Complete Beginner in 2026"}, {"id": 10, "videoId": "FaF__CALVzE", "thumb": "https://i.ytimg.com/vi/FaF__CALVzE/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "2026년 초보자를 위한 Claude Code 완벽 가이드", "channel": "AI Master", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=FaF__CALVzE", "views": 20524, "duration": "1:21:50", "summary": "Claude Code 설치부터 실전 프로젝트 구축까지 초보자 눈높이에서 단계별로 따라 할 수 있는 종합 튜토리얼.", "summaryHtml": "Claude Code 설치부터 실전 프로젝트 구축까지 초보자 눈높이에서 단계별로 따라 할 수 있는 종합 튜토리얼.", "titleHtml": "2026년 초보자를 위한 Claude Code 완벽 가이드"}, {"id": 11, "videoId": "NZsLQhRCFl4", "thumb": "https://i.ytimg.com/vi/NZsLQhRCFl4/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "Ultimate Vibe Coding Course | From Zero to Production-Ready Website Using AI", "channel": "VIRTUAL CODE", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=NZsLQhRCFl4", "views": 10445, "duration": "1:49:12", "summary": "아이디어 단계에서 시작해 자동 테스트와 배포까지 프로덕션 수준의 웹사이트를 AI로 완성하는 풀 코스 실습.", "summaryHtml": "아이디어 단계에서 시작해 자동 테스트와 배포까지 프로덕션 수준의 웹사이트를 AI로 완성하는 풀 코스 실습.", "titleHtml": "Ultimate Vibe Coding Course | From Zero to Production-Ready Website Using AI"}, {"id": 12, "videoId": "kALFA38XHY0", "thumb": "https://i.ytimg.com/vi/kALFA38XHY0/hqdefault.jpg", "categoryKey": "guide", "categoryLabel": "가이드·기본기", "categoryIcon": "🎓", "title": "바이브코딩할 때 프론트엔드·백엔드 기초 개념은 반드시 알아야 하는 이유", "channel": "마일드코드", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=kALFA38XHY0", "views": 1882, "duration": "11:42", "summary": "비개발자가 Claude Code 등으로 바이브코딩할 때 프론트엔드·백엔드 구조 개념을 알아야 막히지 않고 지시할 수 있는 이유 설명.", "summaryHtml": "비개발자가 Claude Code 등으로 바이브코딩할 때 프론트엔드·백엔드 구조 개념을 알아야 막히지 않고 지시할 수 있는 이유 설명.", "titleHtml": "바이브코딩할 때 프론트엔드·백엔드 기초 개념은 반드시 알아야 하는 이유"}, {"id": 13, "videoId": "KAwv5CrnWoU", "thumb": "https://i.ytimg.com/vi/KAwv5CrnWoU/hqdefault.jpg", "categoryKey": "insight", "categoryLabel": "사례·인사이트", "categoryIcon": "💡", "title": "바이브코딩, Claude Code 팀 출신도 '내 게임을 모르겠다'… 그가 찾은 해법", "channel": "AI 사업일지", "date": "2026-11-24", "url": "https://www.youtube.com/watch?v=KAwv5CrnWoU", "views": 11597, "duration": "11:37", "summary": "전 Anthropic Claude Code 팀 타릭 시히파(Thariq Shihipar)의 AI Engineer CODE 2026 강연 핵심 정리 — AI가 짠 코드를 사람이 이해하고 통제하는 해법.", "summaryHtml": "전 Anthropic Claude Code 팀 타릭 시히파(Thariq Shihipar)의 AI Engineer CODE 2026 강연 핵심 정리 — AI가 짠 코드를 사람이 이해하고 통제하는 해법.", "titleHtml": "바이브코딩, Claude Code 팀 출신도 &#x27;내 게임을 모르겠다&#x27;… 그가 찾은 해법"}, {"id": 14, "videoId": "uACw3NYYD7k", "thumb": "https://i.ytimg.com/vi/uACw3NYYD7k/hqdefault.jpg", "categoryKey": "insight", "categoryLabel": "사례·인사이트", "categoryIcon": "💡", "title": "바이브코딩으로 만든 서비스, 10명 중 9명이 여기서 멈춥니다 (만든 다음 사업으로 바꾸는 법)", "channel": "바이브석 | AI 솔로프리너", "date": "2026-11-19", "url": "https://www.youtube.com/watch?v=uACw3NYYD7k", "views": 2446, "duration": "5:31", "summary": "바이브코딩으로 앱을 만드는 것보다 이후 실제 수익화·사업화로 연결하는 과정에서 막히는 지점과 돌파 전략 인터뷰.", "summaryHtml": "바이브코딩으로 앱을 만드는 것보다 이후 실제 수익화·사업화로 연결하는 과정에서 막히는 지점과 돌파 전략 인터뷰.", "titleHtml": "바이브코딩으로 만든 서비스, 10명 중 9명이 여기서 멈춥니다 (만든 다음 사업으로 바꾸는 법)"}, {"id": 15, "videoId": "KcaLU1r4oL0", "thumb": "https://i.ytimg.com/vi/KcaLU1r4oL0/hqdefault.jpg", "categoryKey": "insight", "categoryLabel": "사례·인사이트", "categoryIcon": "💡", "title": "직접 경험하고 풀어드리는 50대 이상 시니어의 바이브코딩, AX 방향성 제안", "channel": "양실장의 바이브코딩대학", "date": "2026-11-25", "url": "https://www.youtube.com/watch?v=KcaLU1r4oL0", "views": 1484, "duration": "9:06", "summary": "시니어 세대가 AI 에이전트와 바이브코딩을 실제 업무·인생 기회(AX)로 전환하는 현실적인 방향성과 경험담 공유.", "summaryHtml": "시니어 세대가 AI 에이전트와 바이브코딩을 실제 업무·인생 기회(AX)로 전환하는 현실적인 방향성과 경험담 공유.", "titleHtml": "직접 경험하고 풀어드리는 50대 이상 시니어의 바이브코딩, AX 방향성 제안"}];
+let activeCat = 'all';
+let searchTerm = '';
+let sortBy = 'default';
+
+function render() {
+  const container = document.getElementById('cards');
+  let list = ITEMS.filter(item => {
+    if (activeCat !== 'all' && item.categoryKey !== activeCat) return false;
+    if (searchTerm) {
+      const hay = (item.title + ' ' + item.summary + ' ' + item.channel).toLowerCase();
+      if (!hay.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+
+  if (sortBy === 'views') {
+    list = [...list].sort((a, b) => b.views - a.views);
+  } else if (sortBy === 'date') {
+    list = [...list].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }
+
+  if (!list.length) {
+    container.innerHTML = '<div class="empty">조건에 맞는 영상이 없습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = list.map(item => `
+    <article class="vid-card">
+      <a class="thumb-wrap" href="${item.url}" target="_blank" rel="noopener noreferrer">
+        <img src="${item.thumb}" alt="" loading="lazy">
+        <span class="cat-overlay">${item.categoryIcon} ${item.categoryLabel}</span>
+        ${item.duration ? `<span class="dur-badge">${item.duration}</span>` : ''}
+      </a>
+      <div class="vid-body">
+        <h3 class="vid-title">${item.titleHtml}</h3>
+        <p class="vid-summary">${item.summaryHtml}</p>
+      </div>
+      <div class="vid-footer">
+        <span class="channel" title="${item.channel}">${item.channel} · ${item.date}</span>
+        <div class="metrics">
+          <span>👀 ${item.views.toLocaleString()}</span>
+          <a class="yt-link" href="${item.url}" target="_blank" rel="noopener noreferrer">시청 ↗</a>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCat = btn.dataset.cat;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  searchTerm = e.target.value.trim().toLowerCase();
+  render();
+});
+
+document.getElementById('sort').addEventListener('change', e => {
+  sortBy = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
